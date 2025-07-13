@@ -14,45 +14,85 @@ datasource db {
 }
 
 model User {
-  id String @id @default(uuid())
-  email String @unique
-  role String 
-  Doctor Doctor?
-  Patient Patient?
+  id       String  @id @default(uuid())
+  email    String  @unique
+  name     String?
+  role     Role    @default(PATIENT)
+  auth0Id  String  @unique
+  avatar   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Doctor   Doctor?
+  Patient  Patient?
 }
 
 model Doctor {
-  id String @id @default(uuid())
-  userId String @unique
-  user User @relation(fields: [userId], references: [id])
-  patients  Patient[] @relation("DoctorPatient")
-  AccessRequest AccessRequest[]
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  specialization  String?
+  licenseNumber   String?
+  hospital        String?
+  patients        Patient[] @relation("DoctorPatient")
+  accessRequests  AccessRequest[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 model Patient {
-  id String @id @default(uuid())
-  userId String @unique
-  user User @relation(fields:[userId], references: [id])
-  doctors   Doctor[] @relation("DoctorPatient")
-  records   Record[]
-  AccessRequest AccessRequest[]
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dateOfBirth    DateTime?
+  phoneNumber    String?
+  address        String?
+  emergencyContact String?
+  bloodType      String?
+  allergies      String?
+  doctors        Doctor[] @relation("DoctorPatient")
+  records        Record[]
+  accessRequests AccessRequest[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model Record {
-  id        String   @id @default(uuid())
-  title     String
-  content   String
-  patientId String
-  patient   Patient  @relation(fields: [patientId], references: [id])
-  createdAt DateTime @default(now())
+  id          String   @id @default(uuid())
+  title       String
+  content     String
+  diagnosis   String?
+  treatment   String?
+  medications String?
+  notes       String?
+  patientId   String
+  patient     Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model AccessRequest {
   id        String   @id @default(uuid())
   doctorId  String
   patientId String
-  approved  Boolean  @default(false)
+  status    RequestStatus @default(PENDING)
+  reason    String?
+  message   String?
+  doctor    Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  patient   Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([doctorId, patientId])
+}
 
-  doctor    Doctor   @relation(fields: [doctorId], references: [id])
-  patient   Patient  @relation(fields: [patientId], references: [id])
+enum Role {
+  DOCTOR
+  PATIENT
+  ADMIN
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  DENIED
 }

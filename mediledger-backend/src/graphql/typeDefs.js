@@ -1,49 +1,170 @@
-const { gql } = require('apollo-server');
+// graphql/typeDefs.js
+const { gql } = require('graphql-tag');
 
-const typeDefs = gql`
+module.exports = gql`
   type User {
     id: ID!
     email: String!
-    role: String!
+    name: String
+    role: Role!
+    auth0Id: String!
+    avatar: String
+    createdAt: String!
+    updatedAt: String!
+    Doctor: Doctor
+    Patient: Patient
   }
+
   type Doctor {
     id: ID!
+    userId: ID!
     user: User!
-    patients: [Patient]
+    specialization: String
+    licenseNumber: String
+    hospital: String
+    patients: [Patient!]!
+    accessRequests: [AccessRequest!]!
+    createdAt: String!
+    updatedAt: String!
   }
+
   type Patient {
     id: ID!
+    userId: ID!
     user: User!
-    records: [Record]
-    doctors: [Doctor]
+    dateOfBirth: String
+    phoneNumber: String
+    address: String
+    emergencyContact: String
+    bloodType: String
+    allergies: String
+    doctors: [Doctor!]!
+    records: [Record!]!
+    accessRequests: [AccessRequest!]!
+    createdAt: String!
+    updatedAt: String!
   }
+
   type Record {
     id: ID!
     title: String!
     content: String!
+    diagnosis: String
+    treatment: String
+    medications: String
+    notes: String
+    patientId: ID!
+    patient: Patient!
     createdAt: String!
+    updatedAt: String!
   }
+
   type AccessRequest {
     id: ID!
+    doctorId: ID!
+    patientId: ID!
+    status: RequestStatus!
+    reason: String
+    message: String
     doctor: Doctor!
     patient: Patient!
-    approved: Boolean!
+    createdAt: String!
+    updatedAt: String!
   }
+
+  enum Role {
+    DOCTOR
+    PATIENT
+    ADMIN
+  }
+
+  enum RequestStatus {
+    PENDING
+    APPROVED
+    DENIED
+  }
+
   type Query {
-    getUsers: [User]
-    getDoctors: [Doctor]
-    getPatients: [Patient]
-    getRecords(patientId: ID!): [Record]
-    getAccessRequests(doctorId: ID!): [AccessRequest]
+    me: User
+    patients: [Patient!]!
+    doctors: [Doctor!]!
+    myPatients: [Patient!]!
+    myRecords: [Record!]!
+    accessRequests: [AccessRequest!]!
+    pendingRequests: [AccessRequest!]!
+    patientRecords(patientId: ID!): [Record!]!
   }
+
   type Mutation {
-    createUser(email: String!, role: String!): User
-    createDoctor(userId: String!): Doctor
-    createPatient(userId: String!): Patient
-    createRecord(patientId: String!, title: String!, content: String!): Record
-    requestAccess(doctorId: String!, patientId: String!): AccessRequest
-    approveAccess(requestId: String!): AccessRequest
+    createUser(input: CreateUserInput!): User!
+    updateProfile(input: UpdateProfileInput!): User!
+    createAccessRequest(input: CreateAccessRequestInput!): AccessRequest!
+    updateAccessRequest(input: UpdateAccessRequestInput!): AccessRequest!
+    createRecord(input: CreateRecordInput!): Record!
+    updateRecord(input: UpdateRecordInput!): Record!
+    deleteRecord(id: ID!): Boolean!
+  }
+
+  input CreateUserInput {
+    email: String!
+    name: String!
+    role: Role!
+    auth0Id: String!
+    avatar: String
+    doctorData: DoctorInput
+    patientData: PatientInput
+  }
+
+  input UpdateProfileInput {
+    name: String
+    avatar: String
+    doctorData: DoctorInput
+    patientData: PatientInput
+  }
+
+  input DoctorInput {
+    specialization: String
+    licenseNumber: String
+    hospital: String
+  }
+
+  input PatientInput {
+    dateOfBirth: String
+    phoneNumber: String
+    address: String
+    emergencyContact: String
+    bloodType: String
+    allergies: String
+  }
+
+  input CreateAccessRequestInput {
+    patientId: ID!
+    reason: String
+    message: String
+  }
+
+  input UpdateAccessRequestInput {
+    id: ID!
+    status: RequestStatus!
+  }
+
+  input CreateRecordInput {
+    title: String!
+    content: String!
+    diagnosis: String
+    treatment: String
+    medications: String
+    notes: String
+    patientId: ID
+  }
+
+  input UpdateRecordInput {
+    id: ID!
+    title: String
+    content: String
+    diagnosis: String
+    treatment: String
+    medications: String
+    notes: String
   }
 `;
-
-module.exports = typeDefs;
