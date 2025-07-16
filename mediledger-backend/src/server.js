@@ -7,8 +7,14 @@ const { ApolloServer } = require('apollo-server-express');
 const { passport } = require('./auth');
 const typeDefs = require('./graphql/typeDefs');
 const resolvers = require('./graphql/resolvers');
+const cors = require('cors');
 
 const app = express();
+
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true
+}));
 
 app.use(session({
   secret: process.env.SESSION_SECRET,
@@ -34,7 +40,7 @@ app.get('/auth/google/callback',
   }),
   (req, res) => {
     // Redirect to frontend after successful login
-    res.redirect(process.env.FRONTEND_URL || 'http://localhost:3000');
+    res.redirect(process.env.FRONTEND_URL || 'http://localhost:5173');
   }
 );
 
@@ -62,7 +68,9 @@ const server = new ApolloServer({
 
 async function startServer() {
   await server.start();
-  server.applyMiddleware({ app });
+  server.applyMiddleware({ app,
+    cors: false
+   });
 
   const PORT = process.env.PORT || 4000;
   http.createServer(app).listen(PORT, () => {
