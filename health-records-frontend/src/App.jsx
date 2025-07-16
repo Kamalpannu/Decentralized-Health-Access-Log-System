@@ -1,5 +1,5 @@
 import { gql, useQuery } from '@apollo/client';
-import Login from './Login';
+import {LoginPage} from './pages/LoginPage';
 import Profile from './Profile';
 
 const ME_QUERY = gql`
@@ -18,7 +18,7 @@ function App() {
 
   return (
     <div>
-      {data?.me ? <Profile /> : <Login />}
+      {data?.me ? <Profile /> : <LoginPage />}
     </div>
   );
 }
