@@ -1,8 +1,9 @@
-// graphql/resolvers.js
 const prisma = require('../prismaClient');
 const { requireAuth, requireRole } = require('../auth');
+const GraphQLJSON = require('graphql-type-json');
 
 module.exports = {
+  JSON: GraphQLJSON,
   Query: {
     me: async (_, __, { user }) => {
       return requireAuth(user);
@@ -188,16 +189,18 @@ module.exports = {
         if (!hasAccess) throw new Error('Access denied');
       }
 
+      // Only update fields if provided
+      const updateData = {};
+      if (input.title !== undefined) updateData.title = input.title;
+      if (input.content !== undefined) updateData.content = input.content;
+      if (input.diagnosis !== undefined) updateData.diagnosis = input.diagnosis;
+      if (input.treatment !== undefined) updateData.treatment = input.treatment;
+      if (input.medications !== undefined) updateData.medications = input.medications;
+      if (input.notes !== undefined) updateData.notes = input.notes;
+
       return prisma.record.update({
         where: { id: input.id },
-        data: {
-          title: input.title,
-          content: input.content,
-          diagnosis: input.diagnosis,
-          treatment: input.treatment,
-          medications: input.medications,
-          notes: input.notes,
-        }
+        data: updateData
       });
     },
 
@@ -224,6 +227,25 @@ module.exports = {
       }
 
       await prisma.record.delete({ where: { id } });
+      return true;
+    },
+
+    setUserRole: async (_, { role, data }, { user }) => {
+      requireAuth(user);
+
+      if (!['DOCTOR', 'PATIENT'].includes(role)) {
+        throw new Error('Invalid role');
+      }
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          role,
+          Doctor: role === 'DOCTOR' ? { create: data } : undefined,
+          Patient: role === 'PATIENT' ? { create: data } : undefined
+        }
+      });
+
       return true;
     }
   }

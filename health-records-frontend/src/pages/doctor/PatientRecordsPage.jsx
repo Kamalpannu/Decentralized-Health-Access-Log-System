@@ -35,8 +35,11 @@ export const PatientRecordsPage = () => {
     await createMedicalRecord({
       variables: {
         input: {
-          ...formData,
-          patientId
+          patientId,
+          title: formData.title,
+          content: formData.description,
+          diagnosis: formData.diagnosis,
+          treatment: formData.treatment
         }
       }
     });
@@ -179,7 +182,7 @@ export const PatientRecordsPage = () => {
                     <div className="flex items-center space-x-4 text-sm text-gray-600 mb-2">
                       <div className="flex items-center">
                         <User className="h-4 w-4 mr-1" />
-                        Dr. {record.doctor.name}
+                        Dr. {record.doctor.user.name}
                       </div>
                       <div className="flex items-center">
                         <Calendar className="h-4 w-4 mr-1" />
@@ -187,7 +190,7 @@ export const PatientRecordsPage = () => {
                       </div>
                     </div>
                     {record.description && (
-                      <p className="text-gray-700 mb-3">{record.description}</p>
+                      <p className="text-gray-700 mb-3">{record.content}</p>
                     )}
                   </div>
                 </div>

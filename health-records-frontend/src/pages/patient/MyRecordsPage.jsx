@@ -13,6 +13,7 @@ export const MyRecordsPage = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900">My Medical Records</h1>
         <p className="text-gray-600">
@@ -20,6 +21,7 @@ export const MyRecordsPage = () => {
         </p>
       </div>
 
+      {/* Records Timeline */}
       <div className="space-y-4">
         {records.length > 0 ? (
           records.map(record => (
@@ -48,8 +50,8 @@ export const MyRecordsPage = () => {
                     </div>
                   </div>
                   
-                  {record.description && (
-                    <p className="text-gray-700 mb-4">{record.description}</p>
+                  {record.content && (
+                    <p className="text-gray-700 mb-4">{record.content}</p>
                   )}
                   
                   {(record.diagnosis || record.treatment) && (
@@ -81,6 +83,7 @@ export const MyRecordsPage = () => {
         )}
       </div>
 
+      {/* Health Summary Card */}
       {records.length > 0 && (
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Health Summary</h3>

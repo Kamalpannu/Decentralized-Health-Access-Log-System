@@ -13,25 +13,56 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const { data, loading, error, refetch } = useQuery(GET_ME, {
+  const { data: userData, loading: userLoading, error: userError, refetch } = useQuery(GET_ME, {
     errorPolicy: 'ignore',
+    fetchPolicy: 'cache-and-network',
   });
+  
   const [user, setUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const loading = userLoading;
 
   useEffect(() => {
-    if (data?.me) {
-      setUser(data.me);
-    } else {
+    console.log('Auth state:', { userData, userError });
+    
+    if (userData?.me) {
+      setIsAuthenticated(true);
+      setUser(userData.me);
+    } else if (userError || !userData) {
+      setIsAuthenticated(false);
       setUser(null);
     }
-  }, [data]);
+  }, [userData, userError]);
 
-  const refetchUser = () => {
-    refetch();
+  // Debug logging
+  useEffect(() => {
+    console.log('Auth Context State:', {
+      isAuthenticated,
+      user,
+      loading,
+      hasRole: user?.role,
+      userData: userData?.me?.id
+    });
+  }, [isAuthenticated, user, loading, userData]);
+
+  const refetchUser = async () => {
+    try {
+      await refetch();
+    } catch (error) {
+      console.error('Error refetching user:', error);
+    }
+  };
+
+  const value = {
+    user,
+    loading,
+    error: userError,
+    refetchUser,
+    isAuthenticated
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, error, refetchUser }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

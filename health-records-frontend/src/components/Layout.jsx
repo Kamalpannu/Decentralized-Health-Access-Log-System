@@ -17,10 +17,15 @@ export const Layout = ({ children }) => {
   const location = useLocation();
 
   const handleLogout = () => {
-    // Navigate to backend logout endpoint
-    window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/auth/logout`;
+    fetch('http://localhost:4000/logout', {
+      method: 'GET',
+      credentials: 'include'
+    }).then(() => {
+      window.location.href = '/'; 
+    }).catch((err) => {
+      console.error('Logout failed', err);
+    });
   };
-
   const doctorNavItems = [
     { path: '/dashboard', label: 'Dashboard', icon: Activity },
     { path: '/patients', label: 'All Patients', icon: Users },
@@ -37,7 +42,7 @@ export const Layout = ({ children }) => {
   const navItems = user?.role === 'DOCTOR' ? doctorNavItems : patientNavItems;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen w-full bg-gray-50">
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -54,7 +59,7 @@ export const Layout = ({ children }) => {
                   <img
                     src={user.avatar}
                     alt={user.name}
-                    className="h-8 w-8 rounded-full"
+                    className="h-8 w-8 rounded-full object-cover"
                   />
                 )}
                 <div className="text-sm">
@@ -75,7 +80,7 @@ export const Layout = ({ children }) => {
       </header>
 
       <div className="flex">
-        <nav className="w-64 bg-white shadow-sm min-h-screen border-r border-gray-200">
+        <nav className="w-64 bg-white shadow-sm min-h-screen border-r border-gray-200 flex-shrink-0">
           <div className="p-4">
             <ul className="space-y-2">
               {navItems.map((item) => {
@@ -101,7 +106,9 @@ export const Layout = ({ children }) => {
             </ul>
           </div>
         </nav>
-        <main className="flex-1 p-8">
+
+        {/* Main content */}
+        <main className="flex-1 p-8 min-w-0">
           {children}
         </main>
       </div>

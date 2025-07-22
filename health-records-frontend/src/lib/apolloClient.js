@@ -1,12 +1,22 @@
-import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
+import { ApolloClient, InMemoryCache, createHttpLink, ApolloLink} from '@apollo/client';
 
 const httpLink = createHttpLink({
-  uri: import.meta.env.JFK || 'http://localhost:4000/graphql',
+  uri:'http://localhost:4000/graphql',
   credentials: 'include',
 });
 
+const logLink = new ApolloLink((operation, forward) => {
+  console.log(`Starting request for ${operation.operationName}`);
+  console.log('Variables:', operation.variables);
+
+  return forward(operation).map((response) => {
+    console.log(`Response from ${operation.operationName}:`, response);
+    return response;
+  });
+});
+
 export const client = new ApolloClient({
-  link: httpLink,
+  link: ApolloLink.from([logLink, httpLink]),
   cache: new InMemoryCache(),
   defaultOptions: {
     watchQuery: {

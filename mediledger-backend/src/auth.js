@@ -35,7 +35,7 @@ async (accessToken, refreshToken, profile, done) => {
         name: profile.displayName,
         auth0Id: profile.id,
         avatar: profile.photos[0].value,
-        role: 'PATIENT'
+        role: 'UNASSIGNED'
       }
     });
 

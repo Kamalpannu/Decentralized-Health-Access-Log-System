@@ -19,8 +19,8 @@ export const PatientsPage = () => {
   });
 
   const filteredPatients = data?.patients?.filter(patient =>
-    patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.email.toLowerCase().includes(searchTerm.toLowerCase())
+    patient.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    patient.user.email.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
   const handleRequestAccess = async () => {
@@ -28,7 +28,8 @@ export const PatientsPage = () => {
       await createAccessRequest({
         variables: {
           patientId: selectedPatient.id,
-          purpose: purpose.trim()
+          reason: purpose.trim(),
+          message: purpose.trim()
         }
       });
     }
@@ -66,11 +67,11 @@ export const PatientsPage = () => {
             <div className="flex items-center space-x-4 mb-4">
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                 <span className="text-lg font-semibold text-blue-600">
-                  {patient.name.charAt(0)}
+                  {patient.user.name.charAt(0)}
                 </span>
               </div>
               <div className="flex-1">
-                <h3 className="text-lg font-semibold text-gray-900">{patient.name}</h3>
+                <h3 className="text-lg font-semibold text-gray-900">{patient.user.name}</h3>
                 <p className="text-sm text-gray-500">Patient ID: {patient.id.slice(0, 8)}</p>
               </div>
             </div>
@@ -78,12 +79,12 @@ export const PatientsPage = () => {
             <div className="space-y-2 mb-4">
               <div className="flex items-center text-sm text-gray-600">
                 <Mail className="h-4 w-4 mr-2" />
-                {patient.email}
+                {patient.user.email}
               </div>
-              {patient.phone && (
+              {patient.phoneNumber && (
                 <div className="flex items-center text-sm text-gray-600">
                   <Phone className="h-4 w-4 mr-2" />
-                  {patient.phone}
+                  {patient.phoneNumber}
                 </div>
               )}
               {patient.dateOfBirth && (
@@ -121,7 +122,7 @@ export const PatientsPage = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl max-w-md w-full p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Request Access to {selectedPatient.name}'s Records
+              Request Access to {selectedPatient.user.name}'s Records
             </h3>
             
             <div className="mb-4">

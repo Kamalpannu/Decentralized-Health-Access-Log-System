@@ -1,7 +1,8 @@
-// graphql/typeDefs.js
 const { gql } = require('graphql-tag');
 
 module.exports = gql`
+  scalar JSON
+
   type User {
     id: ID!
     email: String!
@@ -73,6 +74,7 @@ module.exports = gql`
   }
 
   enum Role {
+    UNASSIGNED
     DOCTOR
     PATIENT
     ADMIN
@@ -103,6 +105,7 @@ module.exports = gql`
     createRecord(input: CreateRecordInput!): Record!
     updateRecord(input: UpdateRecordInput!): Record!
     deleteRecord(id: ID!): Boolean!
+    setUserRole(role: Role!, data: JSON): Boolean!
   }
 
   input CreateUserInput {

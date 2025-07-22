@@ -11,8 +11,8 @@ export const MyPatientsPage = () => {
   const { data, loading, error } = useQuery(GET_MY_PATIENTS);
 
   const filteredPatients = data?.myPatients?.filter(patient =>
-    patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.email.toLowerCase().includes(searchTerm.toLowerCase())
+    patient.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    patient.user.email.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
   if (loading) return <div className="flex justify-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>;
@@ -20,6 +20,7 @@ export const MyPatientsPage = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">My Patients</h1>
@@ -29,6 +30,8 @@ export const MyPatientsPage = () => {
           {filteredPatients.length} patient{filteredPatients.length !== 1 ? 's' : ''}
         </div>
       </div>
+
+      {/* Search */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
         <input
@@ -40,6 +43,7 @@ export const MyPatientsPage = () => {
         />
       </div>
 
+      {/* Patients List */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         {filteredPatients.length > 0 ? (
           <div className="divide-y divide-gray-200">
@@ -49,20 +53,20 @@ export const MyPatientsPage = () => {
                   <div className="flex items-center space-x-4">
                     <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                       <span className="text-lg font-semibold text-blue-600">
-                        {patient.name.charAt(0)}
+                        {patient.user.name.charAt(0)}
                       </span>
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900">{patient.name}</h3>
+                      <h3 className="text-lg font-semibold text-gray-900">{patient.user.name}</h3>
                       <div className="flex items-center space-x-4 mt-1">
                         <div className="flex items-center text-sm text-gray-600">
                           <Mail className="h-4 w-4 mr-1" />
-                          {patient.email}
+                          {patient.user.email}
                         </div>
-                        {patient.phone && (
+                        {patient.phoneNumber && (
                           <div className="flex items-center text-sm text-gray-600">
                             <Phone className="h-4 w-4 mr-1" />
-                            {patient.phone}
+                            {patient.phoneNumber}
                           </div>
                         )}
                         {patient.dateOfBirth && (

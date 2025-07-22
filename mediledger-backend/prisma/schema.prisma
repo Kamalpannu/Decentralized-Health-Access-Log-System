@@ -86,6 +86,7 @@ model AccessRequest {
 }
 
 enum Role {
+  UNASSIGNED
   DOCTOR
   PATIENT
   ADMIN

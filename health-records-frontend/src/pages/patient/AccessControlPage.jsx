@@ -15,8 +15,8 @@ export const AccessControlPage = () => {
   const handleResponse = async (requestId, approved) => {
     await respondToAccessRequest({
       variables: {
-        requestId,
-        approved
+        id: requestId,
+        status: approved ? 'APPROVED' : 'DENIED'
       }
     });
   };
@@ -28,6 +28,7 @@ export const AccessControlPage = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Access Control</h1>
         <p className="text-gray-600">
@@ -35,6 +36,7 @@ export const AccessControlPage = () => {
         </p>
       </div>
 
+      {/* Pending Requests */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200">
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900 flex items-center">
@@ -54,9 +56,9 @@ export const AccessControlPage = () => {
                     </div>
                     <div className="flex-1">
                       <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                        Dr. {request.doctor.name}
+                        Dr. {request.doctor.user.name}
                       </h3>
-                      <p className="text-sm text-gray-600 mb-2">{request.doctor.email}</p>
+                      <p className="text-sm text-gray-600 mb-2">{request.doctor.user.email}</p>
                       
                       <div className="bg-gray-50 rounded-lg p-3 mb-3">
                         <h4 className="text-sm font-medium text-gray-900 mb-1">
@@ -103,6 +105,7 @@ export const AccessControlPage = () => {
         )}
       </div>
 
+      {/* Security Information */}
       <div className="bg-blue-50 rounded-xl border border-blue-200 p-6">
         <div className="flex items-start space-x-3">
           <Shield className="h-6 w-6 text-blue-600 flex-shrink-0 mt-1" />

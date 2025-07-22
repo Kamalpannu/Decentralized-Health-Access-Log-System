@@ -41,10 +41,13 @@ export const AccessRequestsPage = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Access Requests</h1>
         <p className="text-gray-600">Track your requests for patient record access</p>
       </div>
+
+      {/* Pending Requests */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200">
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">
@@ -63,9 +66,9 @@ export const AccessRequestsPage = () => {
                     </div>
                     <div className="flex-1">
                       <h3 className="text-lg font-medium text-gray-900">
-                        {request.patient.name}
+                        {request.patient.user.name}
                       </h3>
-                      <p className="text-sm text-gray-600 mb-2">{request.patient.email}</p>
+                      <p className="text-sm text-gray-600 mb-2">{request.patient.user.email}</p>
                       <p className="text-sm text-gray-700 mb-2">
                         <span className="font-medium">Purpose:</span> {request.purpose}
                       </p>
@@ -95,6 +98,7 @@ export const AccessRequestsPage = () => {
         )}
       </div>
 
+      {/* Request History */}
       {completedRequests.length > 0 && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200">
           <div className="px-6 py-4 border-b border-gray-200">
@@ -113,9 +117,9 @@ export const AccessRequestsPage = () => {
                     </div>
                     <div className="flex-1">
                       <h3 className="text-lg font-medium text-gray-900">
-                        {request.patient.name}
+                        {request.patient.user.name}
                       </h3>
-                      <p className="text-sm text-gray-600 mb-2">{request.patient.email}</p>
+                      <p className="text-sm text-gray-600 mb-2">{request.patient.user.email}</p>
                       <p className="text-sm text-gray-700 mb-2">
                         <span className="font-medium">Purpose:</span> {request.purpose}
                       </p>

@@ -1,15 +1,40 @@
 import React from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { Navigate } from 'react-router-dom';
 import { Stethoscope, Shield, Users, FileText } from 'lucide-react';
 
 export const LoginPage = () => {
+  const { isAuthenticated, user, loading } = useAuth();
+
+  // If already authenticated, redirect appropriately
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isAuthenticated && user) {
+    if (!user.role || user.role === 'UNASSIGNED') {
+      return <Navigate to="/select-role" replace />;
+    }
+    return <Navigate to="/dashboard" replace />;
+  }
+
   const handleGoogleLogin = () => {
     const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+    console.log('Redirecting to Google OAuth:', `${backendUrl}/auth/google`);
     window.location.href = `${backendUrl}/auth/google`;
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
+    <div className="min-h-screen  bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="w-full px-4">
+        {/* Logo and title */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
             <Stethoscope className="h-8 w-8 text-white" />
@@ -17,6 +42,8 @@ export const LoginPage = () => {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Global Health Chain</h1>
           <p className="text-gray-600">Secure healthcare data management platform</p>
         </div>
+
+        {/* Login card */}
         <div className="bg-white rounded-xl shadow-lg p-8">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-semibold text-gray-900 mb-2">Welcome Back</h2>

@@ -12,14 +12,24 @@ export const GET_ME = gql`
   }
 `;
 
+export const IS_AUTHENTICATED = gql`
+  query IsAuthenticated {
+    me {
+      id
+    }
+  }
+`;
+
 export const GET_PATIENTS = gql`
   query GetPatients {
     patients {
       id
-      name
-      email
+      user {
+        name
+        email
+      }
       dateOfBirth
-      phone
+      phoneNumber
     }
   }
 `;
@@ -28,10 +38,12 @@ export const GET_MY_PATIENTS = gql`
   query GetMyPatients {
     myPatients {
       id
-      name
-      email
+      user {
+        name
+        email
+      }
       dateOfBirth
-      phone
+      phoneNumber
     }
   }
 `;
@@ -42,8 +54,10 @@ export const GET_ACCESS_REQUESTS = gql`
       id
       patientId
       patient {
-        name
-        email
+        user {
+          name
+          email
+        }
       }
       status
       requestedAt
@@ -57,12 +71,14 @@ export const GET_PATIENT_RECORDS = gql`
     patientRecords(patientId: $patientId) {
       id
       title
-      description
+      content
       diagnosis
       treatment
       createdAt
       doctor {
-        name
+        user {
+          name
+        }
       }
     }
   }
@@ -73,12 +89,14 @@ export const GET_MY_RECORDS = gql`
     myRecords {
       id
       title
-      description
+      content
       diagnosis
       treatment
       createdAt
       doctor {
-        name
+        user {
+          name
+        }
       }
     }
   }
@@ -90,8 +108,10 @@ export const GET_PENDING_REQUESTS = gql`
       id
       doctorId
       doctor {
-        name
-        email
+        user {
+          name
+          email
+        }
       }
       status
       requestedAt
@@ -101,8 +121,8 @@ export const GET_PENDING_REQUESTS = gql`
 `;
 
 export const CREATE_ACCESS_REQUEST = gql`
-  mutation CreateAccessRequest($patientId: ID!, $purpose: String!) {
-    createAccessRequest(patientId: $patientId, purpose: $purpose) {
+  mutation CreateAccessRequest($patientId: ID!, $reason: String, $message: String) {
+    createAccessRequest(input: { patientId: $patientId, reason: $reason, message: $message }) {
       id
       status
     }
@@ -110,20 +130,28 @@ export const CREATE_ACCESS_REQUEST = gql`
 `;
 
 export const CREATE_MEDICAL_RECORD = gql`
-  mutation CreateMedicalRecord($input: MedicalRecordInput!) {
-    createMedicalRecord(input: $input) {
+  mutation CreateMedicalRecord($input: RecordInput!) {
+    createRecord(input: $input) {
       id
       title
-      description
+      content
+      diagnosis
+      treatment
     }
   }
 `;
 
 export const RESPOND_TO_ACCESS_REQUEST = gql`
-  mutation RespondToAccessRequest($requestId: ID!, $approved: Boolean!) {
-    respondToAccessRequest(requestId: $requestId, approved: $approved) {
+  mutation RespondToAccessRequest($id: ID!, $status: String!) {
+    updateAccessRequest(input: { id: $id, status: $status }) {
       id
       status
     }
+  }
+`;
+
+export const SET_USER_ROLE = gql`
+  mutation SetUserRole($role: Role!, $data: JSON) {
+    setUserRole(role: $role, data: $data)
   }
 `;
