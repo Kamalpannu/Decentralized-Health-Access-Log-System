@@ -5,24 +5,42 @@ import { Shield, Check, X, Clock, Calendar, User } from 'lucide-react';
 
 export const AccessControlPage = () => {
   const { data, loading, error, refetch } = useQuery(GET_PENDING_REQUESTS);
-  
-  const [respondToAccessRequest] = useMutation(RESPOND_TO_ACCESS_REQUEST, {
+
+  const [respondToAccessRequest, { loading: responding }] = useMutation(RESPOND_TO_ACCESS_REQUEST, {
     onCompleted: () => {
       refetch();
+    },
+    onError: (err) => {
+      console.error('Failed to respond to access request:', err);
+      // You might want to show a notification here
     }
   });
 
   const handleResponse = async (requestId, approved) => {
+    if (responding) return;
     await respondToAccessRequest({
       variables: {
-        id: requestId,
-        status: approved ? 'APPROVED' : 'DENIED'
+        input: {
+          id: requestId,
+          status: approved ? 'APPROVED' : 'DENIED'
+        }
       }
     });
   };
 
-  if (loading) return <div className="flex justify-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>;
-  if (error) return <div className="text-red-600 text-center py-8">Error loading requests: {error.message}</div>;
+  if (loading)
+    return (
+      <div className="flex justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="text-red-600 text-center py-8">
+        Error loading requests: {error.message}
+      </div>
+    );
 
   const pendingRequests = data?.pendingRequests || [];
 
@@ -32,7 +50,8 @@ export const AccessControlPage = () => {
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Access Control</h1>
         <p className="text-gray-600">
-          Manage who can access your medical records. You have {pendingRequests.length} pending request{pendingRequests.length !== 1 ? 's' : ''}
+          Manage who can access your medical records. You have {pendingRequests.length} pending request
+          {pendingRequests.length !== 1 ? 's' : ''}
         </p>
       </div>
 
@@ -44,10 +63,10 @@ export const AccessControlPage = () => {
             Pending Access Requests ({pendingRequests.length})
           </h2>
         </div>
-        
+
         {pendingRequests.length > 0 ? (
           <div className="divide-y divide-gray-200">
-            {pendingRequests.map(request => (
+            {pendingRequests.map((request) => (
               <div key={request.id} className="p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-4">
@@ -59,14 +78,14 @@ export const AccessControlPage = () => {
                         Dr. {request.doctor.user.name}
                       </h3>
                       <p className="text-sm text-gray-600 mb-2">{request.doctor.user.email}</p>
-                      
+
                       <div className="bg-gray-50 rounded-lg p-3 mb-3">
                         <h4 className="text-sm font-medium text-gray-900 mb-1">
                           Purpose of Access Request:
                         </h4>
-                        <p className="text-sm text-gray-700">{request.purpose}</p>
+                        <p className="text-sm text-gray-700">{request.reason}</p>
                       </div>
-                      
+
                       <div className="flex items-center text-sm text-gray-500">
                         <Calendar className="h-4 w-4 mr-1" />
                         Requested on {new Date(request.requestedAt).toLocaleDateString()}
@@ -74,18 +93,20 @@ export const AccessControlPage = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="flex space-x-3 mt-4">
                   <button
                     onClick={() => handleResponse(request.id, false)}
-                    className="flex items-center px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors"
+                    disabled={responding}
+                    className="flex items-center px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <X className="h-4 w-4 mr-2" />
                     Deny Access
                   </button>
                   <button
                     onClick={() => handleResponse(request.id, true)}
-                    className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    disabled={responding}
+                    className="flex items-center px-4 py-2 bg-green-600 text-black rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Check className="h-4 w-4 mr-2" />
                     Grant Access

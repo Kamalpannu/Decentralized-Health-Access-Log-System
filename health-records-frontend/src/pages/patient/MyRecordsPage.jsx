@@ -1,15 +1,26 @@
 import React from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_MY_RECORDS } from '../../lib/graphql-queries';
-import { FileText, Calendar, User, Stethoscope } from 'lucide-react';
+import { FileText, Calendar, Stethoscope } from 'lucide-react';
 
 export const MyRecordsPage = () => {
   const { data, loading, error } = useQuery(GET_MY_RECORDS);
 
-  if (loading) return <div className="flex justify-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>;
-  if (error) return <div className="text-red-600 text-center py-8">Error loading records: {error.message}</div>;
+  if (loading)
+    return (
+      <div className="flex justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  if (error)
+    return (
+      <div className="text-red-600 text-center py-8">Error loading records: {error.message}</div>
+    );
 
   const records = data?.myRecords || [];
+
+  // Compute date 30 days ago for filtering
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
   return (
     <div className="space-y-6">
@@ -24,19 +35,20 @@ export const MyRecordsPage = () => {
       {/* Records Timeline */}
       <div className="space-y-4">
         {records.length > 0 ? (
-          records.map(record => (
-            <div key={record.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+          records.map((record) => (
+            <div
+              key={record.id}
+              className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+            >
               <div className="flex items-start space-x-4">
                 <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
                   <FileText className="h-6 w-6 text-blue-600" />
                 </div>
-                
+
                 <div className="flex-1">
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                        {record.title}
-                      </h3>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-1">{record.title}</h3>
                       <div className="flex items-center space-x-4 text-sm text-gray-600">
                         <div className="flex items-center">
                           <Stethoscope className="h-4 w-4 mr-1" />
@@ -49,11 +61,9 @@ export const MyRecordsPage = () => {
                       </div>
                     </div>
                   </div>
-                  
-                  {record.content && (
-                    <p className="text-gray-700 mb-4">{record.content}</p>
-                  )}
-                  
+
+                  {record.content && <p className="text-gray-700 mb-4">{record.content}</p>}
+
                   {(record.diagnosis || record.treatment) && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
                       {record.diagnosis && (
@@ -78,7 +88,9 @@ export const MyRecordsPage = () => {
           <div className="text-center py-12">
             <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No medical records yet</h3>
-            <p className="text-gray-600">Your medical records will appear here when doctors add them to your profile</p>
+            <p className="text-gray-600">
+              Your medical records will appear here when doctors add them to your profile
+            </p>
           </div>
         )}
       </div>
@@ -94,13 +106,15 @@ export const MyRecordsPage = () => {
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-green-600">
-                {new Set(records.map(r => r.doctor.name)).size}
+                {new Set(records.map((r) => r.doctor.name)).size}
               </div>
               <div className="text-sm text-gray-600">Doctors</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-purple-600">
-                {records.filter(r => r.createdAt > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()).length}
+                {records.filter(
+                  (r) => new Date(r.createdAt) > thirtyDaysAgo
+                ).length}
               </div>
               <div className="text-sm text-gray-600">Last 30 Days</div>
             </div>

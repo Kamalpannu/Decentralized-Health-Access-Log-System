@@ -32,12 +32,27 @@ export const AccessRequestsPage = () => {
     }
   };
 
-  if (loading) return <div className="flex justify-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>;
-  if (error) return <div className="text-red-600 text-center py-8">Error loading access requests: {error.message}</div>;
+  if (loading) 
+    return (
+      <div className="flex justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+
+  if (error) 
+    return (
+      <div className="text-red-600 text-center py-8">
+        Error loading access requests: {error.message}
+      </div>
+    );
 
   const requests = data?.accessRequests || [];
-  const pendingRequests = requests.filter(req => req.status === 'PENDING');
-  const completedRequests = requests.filter(req => req.status !== 'PENDING');
+
+  // Filter out requests with missing patient or user data
+  const validRequests = requests.filter(req => req.patient?.user);
+
+  const pendingRequests = validRequests.filter(req => req.status === 'PENDING');
+  const completedRequests = validRequests.filter(req => req.status !== 'PENDING');
 
   return (
     <div className="space-y-6">
@@ -54,7 +69,7 @@ export const AccessRequestsPage = () => {
             Pending Requests ({pendingRequests.length})
           </h2>
         </div>
-        
+
         {pendingRequests.length > 0 ? (
           <div className="divide-y divide-gray-200">
             {pendingRequests.map(request => (
@@ -66,19 +81,21 @@ export const AccessRequestsPage = () => {
                     </div>
                     <div className="flex-1">
                       <h3 className="text-lg font-medium text-gray-900">
-                        {request.patient.user.name}
+                        {request.patient?.user?.name || 'Unknown'}
                       </h3>
-                      <p className="text-sm text-gray-600 mb-2">{request.patient.user.email}</p>
+                      <p className="text-sm text-gray-600 mb-2">
+                        {request.patient?.user?.email || 'Unknown'}
+                      </p>
                       <p className="text-sm text-gray-700 mb-2">
-                        <span className="font-medium">Purpose:</span> {request.purpose}
+                        <span className="font-medium">Purpose:</span> {request.reason}
                       </p>
                       <div className="flex items-center text-sm text-gray-500">
                         <Calendar className="h-4 w-4 mr-1" />
-                        Requested {new Date(request.requestedAt).toLocaleDateString()}
+                        Requested {new Date(request.createdAt).toLocaleDateString()}
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     {getStatusIcon(request.status)}
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(request.status)}`}>
@@ -106,7 +123,7 @@ export const AccessRequestsPage = () => {
               Request History ({completedRequests.length})
             </h2>
           </div>
-          
+
           <div className="divide-y divide-gray-200">
             {completedRequests.map(request => (
               <div key={request.id} className="p-6">
@@ -117,19 +134,21 @@ export const AccessRequestsPage = () => {
                     </div>
                     <div className="flex-1">
                       <h3 className="text-lg font-medium text-gray-900">
-                        {request.patient.user.name}
+                        {request.patient?.user?.name || 'Unknown'}
                       </h3>
-                      <p className="text-sm text-gray-600 mb-2">{request.patient.user.email}</p>
+                      <p className="text-sm text-gray-600 mb-2">
+                        {request.patient?.user?.email || 'Unknown'}
+                      </p>
                       <p className="text-sm text-gray-700 mb-2">
-                        <span className="font-medium">Purpose:</span> {request.purpose}
+                        <span className="font-medium">Purpose:</span> {request.reason}
                       </p>
                       <div className="flex items-center text-sm text-gray-500">
                         <Calendar className="h-4 w-4 mr-1" />
-                        Requested {new Date(request.requestedAt).toLocaleDateString()}
+                        Requested {new Date(request.createdAt).toLocaleDateString()}
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     {getStatusIcon(request.status)}
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(request.status)}`}>

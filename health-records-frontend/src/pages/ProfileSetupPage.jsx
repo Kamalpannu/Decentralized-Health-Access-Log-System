@@ -22,25 +22,24 @@ export const ProfileSetupPage = () => {
   const location = useLocation();
   const { refetchUser } = useAuth();
   const selectedRole = location.state?.role || 'PATIENT';
-  
+
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     // Common fields
     name: '',
     phone: '',
-    
+
     // Patient specific fields
     dateOfBirth: '',
     address: '',
     emergencyContact: '',
     bloodType: '',
     allergies: '',
-    
+
     // Doctor specific fields
     specialization: '',
     licenseNumber: '',
-    hospital: '',
-    experience: ''
+    hospital: ''
   });
 
   const [updateUserRole] = useMutation(SET_USER_ROLE, {
@@ -67,12 +66,14 @@ export const ProfileSetupPage = () => {
     setLoading(true);
 
     try {
-      // Prepare data based on role
       let profileData = {};
-      
+
       if (selectedRole === 'PATIENT') {
+        // Convert dateOfBirth to ISO string if it's set
+        const dobISO = formData.dateOfBirth ? new Date(formData.dateOfBirth).toISOString() : null;
+
         profileData = {
-          dateOfBirth: formData.dateOfBirth || null,
+          dateOfBirth: dobISO,
           phoneNumber: formData.phone || null,
           address: formData.address || null,
           emergencyContact: formData.emergencyContact || null,
@@ -83,9 +84,7 @@ export const ProfileSetupPage = () => {
         profileData = {
           specialization: formData.specialization || null,
           licenseNumber: formData.licenseNumber || null,
-          hospital: formData.hospital || null,
-          phoneNumber: formData.phone || null,
-          experience: formData.experience || null
+          hospital: formData.hospital || null
         };
       }
 
@@ -141,8 +140,10 @@ export const ProfileSetupPage = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to role selection
           </button>
-          
-          <div className={`inline-flex items-center justify-center w-16 h-16 bg-${roleColor}-600 rounded-full mb-4`}>
+
+          <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${
+            roleColor === 'green' ? 'bg-green-600' : 'bg-blue-600'
+          }`}>
             <RoleIcon className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -158,6 +159,23 @@ export const ProfileSetupPage = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Common Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                  <User className="h-4 w-4 inline mr-2" />
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  placeholder="Enter your full name"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required={selectedRole === 'PATIENT'} // make required for patients
+                />
+              </div>
+
               <div>
                 <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
                   <Phone className="h-4 w-4 inline mr-2" />
@@ -183,7 +201,7 @@ export const ProfileSetupPage = () => {
                     <Heart className="h-5 w-5 mr-2 text-red-500" />
                     Patient Information
                   </h3>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700 mb-2">
@@ -277,7 +295,7 @@ export const ProfileSetupPage = () => {
                     <Stethoscope className="h-5 w-5 mr-2 text-green-500" />
                     Doctor Information
                   </h3>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label htmlFor="specialization" className="block text-sm font-medium text-gray-700 mb-2">
@@ -330,23 +348,6 @@ export const ProfileSetupPage = () => {
                         placeholder="Current workplace"
                       />
                     </div>
-
-                    <div>
-                      <label htmlFor="experience" className="block text-sm font-medium text-gray-700 mb-2">
-                        Years of Experience
-                      </label>
-                      <input
-                        type="number"
-                        id="experience"
-                        name="experience"
-                        value={formData.experience}
-                        onChange={handleInputChange}
-                        min="0"
-                        max="50"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                        placeholder="Years of practice"
-                      />
-                    </div>
                   </div>
                 </div>
               </>
@@ -356,8 +357,13 @@ export const ProfileSetupPage = () => {
             <div className="pt-6 border-t border-gray-200">
               <button
                 type="submit"
-                disabled={loading || (selectedRole === 'DOCTOR' && (!formData.specialization || !formData.licenseNumber))}
-                className={`w-full flex items-center justify-center px-6 py-3 bg-${roleColor}-600 text-white font-medium rounded-lg hover:bg-${roleColor}-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors`}
+                disabled={
+                  loading ||
+                  (selectedRole === 'DOCTOR' && (!formData.specialization || !formData.licenseNumber))
+                }
+                className={`w-full flex items-center justify-center px-6 py-3 font-medium rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
+                  roleColor === 'green' ? 'bg-green-600 text-white' : 'bg-blue-600 text-white'
+                }`}
               >
                 <Save className="h-5 w-5 mr-2" />
                 Complete Profile Setup

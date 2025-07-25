@@ -60,8 +60,9 @@ export const GET_ACCESS_REQUESTS = gql`
         }
       }
       status
-      requestedAt
-      purpose
+      createdAt
+      reason
+      message
     }
   }
 `;
@@ -114,15 +115,15 @@ export const GET_PENDING_REQUESTS = gql`
         }
       }
       status
-      requestedAt
-      purpose
+      createdAt
+      reason
     }
   }
 `;
 
 export const CREATE_ACCESS_REQUEST = gql`
-  mutation CreateAccessRequest($patientId: ID!, $reason: String, $message: String) {
-    createAccessRequest(input: { patientId: $patientId, reason: $reason, message: $message }) {
+  mutation CreateAccessRequest($input: CreateAccessRequestInput!) {
+    createAccessRequest(input: $input) {
       id
       status
     }
@@ -142,8 +143,8 @@ export const CREATE_MEDICAL_RECORD = gql`
 `;
 
 export const RESPOND_TO_ACCESS_REQUEST = gql`
-  mutation RespondToAccessRequest($id: ID!, $status: String!) {
-    updateAccessRequest(input: { id: $id, status: $status }) {
+  mutation UpdateAccessRequest($input: UpdateAccessRequestInput!) {
+    updateAccessRequest(input: $input) {
       id
       status
     }

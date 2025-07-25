@@ -56,6 +56,7 @@ module.exports = gql`
     notes: String
     patientId: ID!
     patient: Patient!
+    doctor: Doctor!
     createdAt: String!
     updatedAt: String!
   }

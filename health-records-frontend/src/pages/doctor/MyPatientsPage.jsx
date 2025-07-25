@@ -10,13 +10,27 @@ export const MyPatientsPage = () => {
 
   const { data, loading, error } = useQuery(GET_MY_PATIENTS);
 
-  const filteredPatients = data?.myPatients?.filter(patient =>
-    patient.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.user.email.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const patients = data?.myPatients || [];
 
-  if (loading) return <div className="flex justify-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>;
-  if (error) return <div className="text-red-600 text-center py-8">Error loading patients: {error.message}</div>;
+  // Filter patients only if user object exists (safe access)
+  const filteredPatients = patients.filter(patient => 
+    patient.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    patient.user?.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (loading)
+    return (
+      <div className="flex justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="text-red-600 text-center py-8">
+        Error loading patients: {error.message}
+      </div>
+    );
 
   return (
     <div className="space-y-6">
@@ -53,15 +67,15 @@ export const MyPatientsPage = () => {
                   <div className="flex items-center space-x-4">
                     <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                       <span className="text-lg font-semibold text-blue-600">
-                        {patient.user.name.charAt(0)}
+                        {patient.user?.name?.charAt(0) || '?'}
                       </span>
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900">{patient.user.name}</h3>
+                      <h3 className="text-lg font-semibold text-gray-900">{patient.user?.name || 'Unknown'}</h3>
                       <div className="flex items-center space-x-4 mt-1">
                         <div className="flex items-center text-sm text-gray-600">
                           <Mail className="h-4 w-4 mr-1" />
-                          {patient.user.email}
+                          {patient.user?.email || 'No email'}
                         </div>
                         {patient.phoneNumber && (
                           <div className="flex items-center text-sm text-gray-600">
@@ -78,11 +92,11 @@ export const MyPatientsPage = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex space-x-2">
                     <button
                       onClick={() => navigate(`/patient/${patient.id}/records`)}
-                      className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      className="flex items-center px-4 py-2 bg-blue-600 text-black rounded-lg hover:bg-blue-700 transition-colors"
                     >
                       <Eye className="h-4 w-4 mr-2" />
                       View Records
@@ -99,10 +113,9 @@ export const MyPatientsPage = () => {
               {searchTerm ? 'No patients found' : 'No patients yet'}
             </h3>
             <p className="text-gray-600">
-              {searchTerm 
-                ? 'Try adjusting your search criteria' 
-                : 'Patients will appear here once they grant you access to their records'
-              }
+              {searchTerm
+                ? 'Try adjusting your search criteria'
+                : 'Patients will appear here once they grant you access to their records'}
             </p>
           </div>
         )}

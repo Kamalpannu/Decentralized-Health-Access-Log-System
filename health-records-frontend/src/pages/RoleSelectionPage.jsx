@@ -1,31 +1,17 @@
 import React, { useState } from 'react';
-import { useMutation } from '@apollo/client';
-import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { Stethoscope, User, UserCheck, ArrowRight } from 'lucide-react';
-import { SET_USER_ROLE } from '../lib/graphql-queries';
 
 export const RoleSelectionPage = () => {
   const [selectedRole, setSelectedRole] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { refetchUser } = useAuth();
-
-  const [setUserRole] = useMutation(SET_USER_ROLE, {
-    onCompleted: () => {
-      refetchUser();
-    },
-    onError: (error) => {
-      console.error('Error setting role:', error);
-      setLoading(false);
-    }
-  });
+  const navigate = useNavigate();
 
   const handleRoleSelection = async () => {
     if (!selectedRole) return;
     
-    setLoading(true);
-    console.log('Setting role:', selectedRole);
-    await setUserRole({
-      variables: { role: selectedRole}
+    console.log('Navigating to profile setup with role:', selectedRole);
+    navigate('/profile-setup', { 
+      state: { role: selectedRole } 
     });
   };
 
@@ -67,7 +53,6 @@ export const RoleSelectionPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="max-w-4xl w-full">
-        {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
             <UserCheck className="h-8 w-8 text-white" />
@@ -75,8 +60,6 @@ export const RoleSelectionPage = () => {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Choose Your Role</h1>
           <p className="text-gray-600">Select how you'll be using Global Health Chain</p>
         </div>
-
-        {/* Role Selection Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {roles.map((role) => {
             const Icon = role.icon;
@@ -120,25 +103,14 @@ export const RoleSelectionPage = () => {
             );
           })}
         </div>
-
-        {/* Continue Button */}
         <div className="text-center">
           <button
             onClick={handleRoleSelection}
-            disabled={!selectedRole || loading}
+            disabled={!selectedRole}
             className="inline-flex items-center px-8 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {loading ? (
-              <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                Setting up your account...
-              </>
-            ) : (
-              <>
-                Continue as {selectedRole ? roles.find(r => r.id === selectedRole)?.title : 'User'}
-                <ArrowRight className="h-5 w-5 ml-2" />
-              </>
-            )}
+            Continue as {selectedRole ? roles.find(r => r.id === selectedRole)?.title : 'User'}
+            <ArrowRight className="h-5 w-5 ml-2" />
           </button>
         </div>
 

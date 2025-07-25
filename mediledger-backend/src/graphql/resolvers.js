@@ -18,15 +18,28 @@ module.exports = {
       requireAuth(user);
       return prisma.doctor.findMany({ include: { user: true } });
     },
-
     myPatients: async (_, __, { user }) => {
       requireRole(user, 'DOCTOR');
       const doctor = await prisma.doctor.findUnique({
-        where: { userId: user.id },
-        include: { patients: { include: { user: true } } }
+        where: { userId: user.id }
       });
-      return doctor?.patients || [];
-    },
+      if (!doctor) throw new Error('Doctor not found');
+      const approvedAccess = await prisma.accessRequest.findMany({
+        where: {
+          doctorId: doctor.id,
+          status: 'APPROVED'
+        },
+        include: {
+          patient: {
+            include: {
+              user: true
+            }
+          }
+        }
+      });
+      return approvedAccess.map(req => req.patient);
+},
+
 
     myRecords: async (_, __, { user }) => {
       requireRole(user, 'PATIENT');
@@ -61,11 +74,24 @@ module.exports = {
       });
       return patient?.accessRequests || [];
     },
-
     patientRecords: async (_, { patientId }, { user }) => {
       requireRole(user, 'DOCTOR');
-      return prisma.record.findMany({ where: { patientId } });
-    }
+      return prisma.record.findMany({
+        where: { patientId },
+        include: {
+          doctor: {
+            include: {
+              user: true
+            }
+          },
+          patient: {
+            include: {
+              user: true
+            }
+          }
+        }
+      });
+    },
   },
 
   Mutation: {
@@ -141,18 +167,12 @@ module.exports = {
         data: { status: input.status }
       });
     },
-
     createRecord: async (_, { input }, { user }) => {
-      let patientId = input.patientId;
+      requireRole(user, 'DOCTOR');
 
-      if (user.role === 'PATIENT' && !input.patientId) {
-        const patient = await prisma.patient.findUnique({
-          where: { userId: user.id }
-        });
-        patientId = patient.id;
-      } else {
-        requireRole(user, 'DOCTOR');
-      }
+      const doctor = await prisma.doctor.findUnique({
+        where: { userId: user.id },
+      });
 
       return prisma.record.create({
         data: {
@@ -160,10 +180,21 @@ module.exports = {
           content: input.content,
           diagnosis: input.diagnosis,
           treatment: input.treatment,
-          medications: input.medications,
-          notes: input.notes,
-          patientId
-        }
+          patientId: input.patientId,
+          doctorId: doctor.id,
+        },
+        include: {
+          doctor: {
+            include: {
+              user: true,
+            },
+          },
+          patient: {
+            include: {
+              user: true,
+            },
+          },
+        },
       });
     },
 

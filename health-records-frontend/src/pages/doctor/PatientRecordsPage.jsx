@@ -12,20 +12,24 @@ export const PatientRecordsPage = () => {
     title: '',
     description: '',
     diagnosis: '',
-    treatment: ''
+    treatment: '',
   });
 
   const { data, loading, error, refetch } = useQuery(GET_PATIENT_RECORDS, {
     variables: { patientId },
-    skip: !patientId
+    skip: !patientId,
   });
 
-  const [createMedicalRecord] = useMutation(CREATE_MEDICAL_RECORD, {
+  const [createMedicalRecord, { loading: creating }] = useMutation(CREATE_MEDICAL_RECORD, {
     onCompleted: () => {
       setShowCreateForm(false);
       setFormData({ title: '', description: '', diagnosis: '', treatment: '' });
       refetch();
-    }
+    },
+    onError: (mutationError) => {
+      console.error('Error creating medical record:', mutationError);
+      // You can add UI feedback here if needed
+    },
   });
 
   const handleSubmit = async (e) => {
@@ -39,14 +43,25 @@ export const PatientRecordsPage = () => {
           title: formData.title,
           content: formData.description,
           diagnosis: formData.diagnosis,
-          treatment: formData.treatment
-        }
-      }
+          treatment: formData.treatment,
+        },
+      },
     });
   };
 
-  if (loading) return <div className="flex justify-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>;
-  if (error) return <div className="text-red-600 text-center py-8">Error loading records: {error.message}</div>;
+  if (loading)
+    return (
+      <div className="flex justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="text-red-600 text-center py-8">
+        Error loading records: {error.message}
+      </div>
+    );
 
   const records = data?.patientRecords || [];
 
@@ -58,15 +73,16 @@ export const PatientRecordsPage = () => {
           <button
             onClick={() => navigate('/my-patients')}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            aria-label="Back to My Patients"
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Patient Records</h1>
-            <p className="text-gray-600">{records.length} medical records</p>
+            <p className="text-gray-600">{records.length} medical record{records.length !== 1 ? 's' : ''}</p>
           </div>
         </div>
-        
+
         <button
           onClick={() => setShowCreateForm(true)}
           className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -84,11 +100,13 @@ export const PatientRecordsPage = () => {
             <button
               onClick={() => setShowCreateForm(false)}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              aria-label="Close create form"
+              disabled={creating}
             >
               <X className="h-5 w-5" />
             </button>
           </div>
-          
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
@@ -101,9 +119,10 @@ export const PatientRecordsPage = () => {
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 required
+                disabled={creating}
               />
             </div>
-            
+
             <div>
               <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
                 Description
@@ -114,9 +133,10 @@ export const PatientRecordsPage = () => {
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                disabled={creating}
               />
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="diagnosis" className="block text-sm font-medium text-gray-700 mb-1">
@@ -128,9 +148,10 @@ export const PatientRecordsPage = () => {
                   value={formData.diagnosis}
                   onChange={(e) => setFormData({ ...formData, diagnosis: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  disabled={creating}
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="treatment" className="block text-sm font-medium text-gray-700 mb-1">
                   Treatment
@@ -141,24 +162,27 @@ export const PatientRecordsPage = () => {
                   value={formData.treatment}
                   onChange={(e) => setFormData({ ...formData, treatment: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  disabled={creating}
                 />
               </div>
             </div>
-            
+
             <div className="flex space-x-3">
               <button
                 type="button"
                 onClick={() => setShowCreateForm(false)}
                 className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                disabled={creating}
               >
                 Cancel
               </button>
               <button
                 type="submit"
+                disabled={creating}
                 className="flex-1 flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <Save className="h-4 w-4 mr-2" />
-                Save Record
+                {creating ? 'Saving...' : 'Save Record'}
               </button>
             </div>
           </form>
@@ -168,7 +192,7 @@ export const PatientRecordsPage = () => {
       {/* Records List */}
       <div className="space-y-4">
         {records.length > 0 ? (
-          records.map(record => (
+          records.map((record) => (
             <div key={record.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-start space-x-4">
@@ -176,26 +200,24 @@ export const PatientRecordsPage = () => {
                     <FileText className="h-5 w-5 text-blue-600" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                      {record.title}
-                    </h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1">{record.title}</h3>
                     <div className="flex items-center space-x-4 text-sm text-gray-600 mb-2">
                       <div className="flex items-center">
                         <User className="h-4 w-4 mr-1" />
-                        Dr. {record.doctor.user.name}
+                        Dr. {record.doctor?.user?.name || 'Unknown'}
                       </div>
                       <div className="flex items-center">
                         <Calendar className="h-4 w-4 mr-1" />
-                        {new Date(record.createdAt).toLocaleDateString()}
+                        {record.createdAt ? new Date(record.createdAt).toLocaleDateString() : 'Unknown date'}
                       </div>
                     </div>
-                    {record.description && (
+                    {record.content && (
                       <p className="text-gray-700 mb-3">{record.content}</p>
                     )}
                   </div>
                 </div>
               </div>
-              
+
               {(record.diagnosis || record.treatment) && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
                   {record.diagnosis && (
