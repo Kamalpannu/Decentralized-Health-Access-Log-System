@@ -96,6 +96,7 @@ module.exports = gql`
     accessRequests: [AccessRequest!]!
     pendingRequests: [AccessRequest!]!
     patientRecords(patientId: ID!): [Record!]!
+    canCreateRecord(patientId: ID!): Boolean!
   }
 
   type Mutation {

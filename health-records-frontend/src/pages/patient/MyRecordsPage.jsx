@@ -3,6 +3,17 @@ import { useQuery } from '@apollo/client';
 import { GET_MY_RECORDS } from '../../lib/graphql-queries';
 import { FileText, Calendar, Stethoscope } from 'lucide-react';
 
+function formatDate(dateString) {
+  if (!dateString) return 'N/A';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return 'Invalid Date';
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+
 export const MyRecordsPage = () => {
   const { data, loading, error } = useQuery(GET_MY_RECORDS);
 
@@ -12,19 +23,20 @@ export const MyRecordsPage = () => {
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     );
+
   if (error)
     return (
-      <div className="text-red-600 text-center py-8">Error loading records: {error.message}</div>
+      <div className="text-red-600 text-center py-8">
+        Error loading records: {error.message}
+      </div>
     );
 
   const records = data?.myRecords || [];
 
-  // Compute date 30 days ago for filtering
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900">My Medical Records</h1>
         <p className="text-gray-600">
@@ -32,7 +44,6 @@ export const MyRecordsPage = () => {
         </p>
       </div>
 
-      {/* Records Timeline */}
       <div className="space-y-4">
         {records.length > 0 ? (
           records.map((record) => (
@@ -56,7 +67,7 @@ export const MyRecordsPage = () => {
                         </div>
                         <div className="flex items-center">
                           <Calendar className="h-4 w-4 mr-1" />
-                          {new Date(record.createdAt).toLocaleDateString()}
+                          {formatDate(record.createdAt)}
                         </div>
                       </div>
                     </div>
@@ -95,7 +106,6 @@ export const MyRecordsPage = () => {
         )}
       </div>
 
-      {/* Health Summary Card */}
       {records.length > 0 && (
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Health Summary</h3>
@@ -112,9 +122,12 @@ export const MyRecordsPage = () => {
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-purple-600">
-                {records.filter(
-                  (r) => new Date(r.createdAt) > thirtyDaysAgo
-                ).length}
+                {
+                  records.filter((r) => {
+                    const created = new Date(r.createdAt);
+                    return !isNaN(created) && created > thirtyDaysAgo;
+                  }).length
+                }
               </div>
               <div className="text-sm text-gray-600">Last 30 Days</div>
             </div>

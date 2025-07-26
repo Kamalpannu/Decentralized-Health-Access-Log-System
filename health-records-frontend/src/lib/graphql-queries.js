@@ -19,6 +19,11 @@ export const IS_AUTHENTICATED = gql`
     }
   }
 `;
+export const CHECK_ACCESS_QUERY = gql`
+  query CanCreateRecord($patientId: ID!) {
+    canCreateRecord(patientId: $patientId)
+  }
+`;
 
 export const GET_PATIENTS = gql`
   query GetPatients {
@@ -131,13 +136,14 @@ export const CREATE_ACCESS_REQUEST = gql`
 `;
 
 export const CREATE_MEDICAL_RECORD = gql`
-  mutation CreateMedicalRecord($input: RecordInput!) {
+  mutation CreateMedicalRecord($input: CreateRecordInput!) {
     createRecord(input: $input) {
       id
       title
       content
       diagnosis
       treatment
+      patientId
     }
   }
 `;

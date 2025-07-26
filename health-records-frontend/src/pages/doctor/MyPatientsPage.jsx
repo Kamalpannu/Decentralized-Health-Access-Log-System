@@ -3,6 +3,12 @@ import { useQuery } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
 import { GET_MY_PATIENTS } from '../../lib/graphql-queries';
 import { Search, FileText, Calendar, Phone, Mail, Eye } from 'lucide-react';
+import dayjs from 'dayjs';
+
+const formatDate = (dateString) => {
+  const parsed = dayjs(dateString);
+  return parsed.isValid() ? parsed.format('MMM D, YYYY') : 'Unknown date';
+};
 
 export const MyPatientsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -86,7 +92,7 @@ export const MyPatientsPage = () => {
                         {patient.dateOfBirth && (
                           <div className="flex items-center text-sm text-gray-600">
                             <Calendar className="h-4 w-4 mr-1" />
-                            {new Date(patient.dateOfBirth).toLocaleDateString()}
+                            {formatDate(patient.dateOfBirth)}
                           </div>
                         )}
                       </div>

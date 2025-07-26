@@ -57,7 +57,7 @@ export const ProfileSetupPage = () => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]:value
     }));
   };
 
@@ -70,7 +70,9 @@ export const ProfileSetupPage = () => {
 
       if (selectedRole === 'PATIENT') {
         // Convert dateOfBirth to ISO string if it's set
-        const dobISO = formData.dateOfBirth ? new Date(formData.dateOfBirth).toISOString() : null;
+        const dobISO = formData.dateOfBirth
+        ? new Date(formData.dateOfBirth).toISOString()
+        : null;
 
         profileData = {
           dateOfBirth: dobISO,

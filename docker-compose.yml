@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./mediledger-backend
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./mediledger-backend/.env
+
+  frontend:
+    build: ./health-records-frontend
+    ports:
+      - "5173:80" # Vite dev port (if you want Vite dev), else 80 for production
+    depends_on:
+      - backend
