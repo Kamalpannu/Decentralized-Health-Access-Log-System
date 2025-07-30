@@ -8,6 +8,12 @@ export const GET_ME = gql`
       name
       avatar
       role
+      Patient {
+        id
+      }
+      Doctor {
+        id
+      }
     }
   }
 `;
@@ -82,6 +88,11 @@ export const GET_PATIENT_RECORDS = gql`
       treatment
       createdAt
       doctor {
+        user {
+          name
+        }
+      }
+      patient {
         user {
           name
         }
