@@ -1,7 +1,8 @@
 import React from 'react';
 import { useQuery } from '@apollo/client';
-import { GET_MY_RECORDS } from '../../lib/graphql-queries';
+import { GET_MY_RECORDS, GET_ME } from '../../lib/graphql-queries';
 import { FileText, Calendar, Stethoscope } from 'lucide-react';
+import AIBot from '../../components/AIBot';
 
 function formatDate(dateString) {
   if (!dateString) return 'N/A';
@@ -16,6 +17,7 @@ function formatDate(dateString) {
 
 export const MyRecordsPage = () => {
   const { data, loading, error } = useQuery(GET_MY_RECORDS);
+  const { data: userData } = useQuery(GET_ME);
 
   if (loading)
     return (
@@ -133,6 +135,14 @@ export const MyRecordsPage = () => {
             </div>
           </div>
         </div>
+      )}
+      
+      {/* AI Bot Integration */}
+      {userData?.me?.Patient?.id && (
+        <AIBot 
+          patientId={userData.me.Patient.id} 
+          patientName={userData.me.name}
+        />
       )}
     </div>
   );

@@ -1,6 +1,7 @@
 const prisma = require('../prismaClient');
 const { requireAuth, requireRole } = require('../auth');
 const GraphQLJSON = require('graphql-type-json');
+const aiBot = require('../aiBot');
 
 function toISO(obj) {
   return {
@@ -115,6 +116,26 @@ module.exports = {
         }
       });
       return !!access;
+    },
+
+    aiAnalysis: async (_, { patientId }, { user }) => {
+      requireAuth(user);
+      try {
+        const analysis = await aiBot.analyzePatientRecords(patientId, user.id);
+        return analysis;
+      } catch (error) {
+        throw new Error(`AI analysis failed: ${error.message}`);
+      }
+    },
+
+    aiQuestion: async (_, { patientId, question }, { user }) => {
+      requireAuth(user);
+      try {
+        const response = await aiBot.askQuestion(patientId, user.id, question);
+        return response;
+      } catch (error) {
+        throw new Error(`AI question failed: ${error.message}`);
+      }
     },
 },
   Mutation: {

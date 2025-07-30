@@ -97,6 +97,8 @@ module.exports = gql`
     pendingRequests: [AccessRequest!]!
     patientRecords(patientId: ID!): [Record!]!
     canCreateRecord(patientId: ID!): Boolean!
+    aiAnalysis(patientId: ID!): AIAnalysis!
+    aiQuestion(patientId: ID!, question: String!): AIResponse!
   }
 
   type Mutation {
@@ -171,5 +173,18 @@ module.exports = gql`
     treatment: String
     medications: String
     notes: String
+  }
+
+  type AIAnalysis {
+    summary: String!
+    recommendation: String!
+    nextSteps: [String!]!
+    recordsCount: Int!
+    lastRecordDate: String
+  }
+
+  type AIResponse {
+    answer: String!
+    timestamp: String!
   }
 `;

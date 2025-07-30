@@ -8,6 +8,7 @@ import {
 } from '../../lib/graphql-queries';
 import { ArrowLeft, Plus, FileText, Calendar, User, Save, X } from 'lucide-react';
 import dayjs from 'dayjs';
+import AIBot from '../../components/AIBot';
 
 const formatDate = (dateString) => {
   const parsed = dayjs(dateString);
@@ -295,6 +296,14 @@ export const PatientRecordsPage = () => {
           </div>
         )}
       </div>
+      
+      {/* AI Bot Integration */}
+      {patientId && records.length > 0 && (
+        <AIBot 
+          patientId={patientId} 
+          patientName={records[0]?.patient?.user?.name || 'Patient'}
+        />
+      )}
     </div>
   );
 };
